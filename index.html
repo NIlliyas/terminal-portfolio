@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>ILLIYAS N - Terminal Portfolio</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Source+Code+Pro:wght@400;500;600&display=swap');
+
+        body {
+            font-family: 'Source Code Pro', monospace;
+            background-color: #1a1a1a;
+            color: #f0f0f0;
+            overflow-x: hidden;
+        }
+
+        .terminal {
+            background-color: #1e1e1e;
+            border-radius: 12px;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.6);
+            overflow: hidden;
+            margin: 1rem;
+        }
+
+        .terminal-header {
+            background-color: #2d2d2d;
+            height: 36px;
+            border-top-left-radius: 12px;
+            border-top-right-radius: 12px;
+            display: flex;
+            align-items: center;
+            padding: 0 12px;
+        }
+
+        .terminal-button {
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+
+        .terminal-body {
+            padding: 24px;
+            height: calc(100vh - 100px);
+            overflow-y: auto;
+            position: relative;
+        }
+
+        .command-line {
+            display: flex;
+            margin-bottom: 12px;
+            align-items: center;
+        }
+
+        .prompt {
+            color: #34d399;
+            margin-right: 12px;
+            white-space: nowrap;
+            font-weight: 500;
+            min-width: 170px;
+        }
+
+        .command-input {
+            background: transparent;
+            border: none;
+            outline: none;
+            color: #ffffff;
+            width: 100%;
+            font-family: inherit;
+            font-size: 16px;
+            caret-color: #34d399;
+        }
+
+        .command-output {
+            margin-bottom: 24px;
+            white-space: pre-line;
+            line-height: 1.6;
+        }
+
+        .skill-bar {
+            height: 24px;
+            background-color: #2d2d2d;
+            border-radius: 6px;
+            margin-bottom: 12px;
+            overflow: hidden;
+        }
+
+        .skill-progress {
+            height: 100%;
+            background-color: #34d399;
+            border-radius: 6px;
+            transition: width 1s ease-in-out;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .typewriter {
+            overflow: hidden;
+            border-right: 3px solid #34d399;
+            white-space: nowrap;
+            margin: 0 auto;
+            letter-spacing: 1px;
+            animation: typing 3s steps(40, end);
+            display: inline-block;
+        }
+
+        @keyframes typing {
+            from { width: 0; }
+            to { width: 100%; }
+        }
+
+        .autocomplete-suggestions {
+            position: absolute;
+            background-color: #2d2d2d;
+            border: 1px solid #34d399;
+            border-radius: 4px;
+            padding: 8px;
+            max-height: 180px;
+            overflow-y: auto;
+            z-index: 50;
+            min-width: 140px;
+        }
+
+        .autocomplete-suggestion {
+            padding: 6px 8px;
+            cursor: pointer;
+            color: #f0f0f0;
+            border-radius: 4px;
+        }
+
+        .autocomplete-suggestion.focused,
+        .autocomplete-suggestion:hover {
+            background-color: #34d399;
+            color: #1a1a1a;
+        }
+
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #2a2a2a;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #34d399;
+            border-radius: 5px;
+        }
+
+        @media (max-width: 768px) {
+            .terminal {
+                margin: 0.5rem;
+            }
+
+            .terminal-body {
+                padding: 16px;
+                height: calc(100vh - 80px);
+            }
+
+            .prompt {
+                font-size: 14px;
+                min-width: 120px;
+            }
+
+            .command-input {
+                font-size: 14px;
+            }
+
+            .terminal-header {
+                height: 32px;
+            }
+
+            .terminal-button {
+                width: 12px;
+                height: 12px;
+            }
+        }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4 bg-gray-900">
+    <div class="terminal w-full max-w-5xl" role="application" aria-label="Terminal portfolio">
+        <div class="terminal-header">
+            <div class="terminal-button bg-red-500" aria-hidden="true"></div>
+            <div class="terminal-button bg-yellow-500" aria-hidden="true"></div>
+            <div class="terminal-button bg-green-500" aria-hidden="true"></div>
+            <div class="ml-3 text-sm text-gray-300">Terminal - illiyas@portfolio</div>
+        </div>
+
+        <div class="terminal-body" id="terminalBody" role="main" tabindex="0">
+            <!-- Static "library" outputs, kept hidden and cloned when needed -->
+            <div class="command-output hidden" id="helpOutputLibrary">
+                <div class="text-green-400 mb-3 font-semibold">Available Commands:</div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <div><span class="text-yellow-400">help</span> - Display available commands</div>
+                    <div><span class="text-yellow-400">about</span> - About ILLIYAS N</div>
+                    <div><span class="text-yellow-400">skills</span> - Technical skills</div>
+                    <div><span class="text-yellow-400">experience</span> - Work experience</div>
+                    <div><span class="text-yellow-400">education</span> - Education background</div>
+                    <div><span class="text-yellow-400">contact</span> - Contact information</div>
+                    <div><span class="text-yellow-400">clear</span> - Clear terminal output</div>
+                </div>
+            </div>
+
+            <div class="command-output hidden" id="aboutOutputLibrary">
+                <div class="text-green-400 mb-3 font-semibold">About ILLIYAS N:</div>
+                <p class="mb-3">A dedicated and goal-oriented individual from Chennai with a strong academic background, currently pursuing a B.E. in Electronics and Communication Engineering at Vel Tech Multi Tech Engineering College.</p>
+                <p class="mb-3">Passionate about solving complex challenges, exploring innovative solutions, and collaborating on team projects. Committed to continuous learning and professional excellence.</p>
+                <p class="mb-3">Languages: English, Tamil, Urdu, Hindi</p>
+                <p>Certifications: Basic-level certifications in Python, Java, and other programming languages from HackerRank and LeetCode.</p>
+            </div>
+
+            <div class="command-output hidden" id="skillsOutputLibrary">
+                <div class="text-green-400 mb-4 font-semibold">Technical Skills:</div>
+                <div class="mb-4">
+                    <div class="text-yellow-400 mb-2">Programming Languages:</div>
+                    <div class="skill-bar">
+                        <div class="skill-progress" style="width: 85%"></div>
+                    </div>
+                    <div class="flex justify-between text-sm">
+                        <span>Python</span>
+                        <span>85%</span>
+                    </div>
+                    <div class="skill-bar">
+                        <div class="skill-progress" style="width: 80%"></div>
+                    </div>
+                    <div class="flex justify-between text-sm">
+                        <span>Java</span>
+                        <span>80%</span>
+                    </div>
+                    <div class="skill-bar">
+                        <div class="skill-progress" style="width: 75%"></div>
+                    </div>
+                    <div class="flex justify-between text-sm">
+                        <span>HTML/CSS</span>
+                        <span>75%</span>
+                    </div>
+                </div>
+                <div class="mb-4">
+                    <div class="text-yellow-400 mb-2">Tools & IDEs:</div>
+                    <div class="flex flex-wrap gap-3">
+                        <span class="bg-gray-700 px-3 py-1 rounded">VS Code</span>
+                        <span class="bg-gray-700 px-3 py-1 rounded">Figma</span>
+                        <span class="bg-gray-700 px-3 py-1 rounded">Adobe Photoshop</span>
+                        <span class="bg-gray-700 px-3 py-1 rounded">Adobe Illustrator</span>
+                    </div>
+                </div>
+                <div>
+                    <div class="text-yellow-400 mb-2">Database & Backend:</div>
+                    <div class="flex flex-wrap gap-3">
+                        <span class="bg-gray-700 px-3 py-1 rounded">Firebase</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="command-output hidden" id="experienceOutputLibrary">
+                <div class="text-green-400 mb-3 font-semibold">Work Experience:</div>
+                <div class="mb-6">
+                    <div class="text-yellow-400">Founder, XTRACTLY – Strategic Insights Solution</div>
+                    <ul class="list-disc list-inside mt-2 ml-4">
+                        <li>Launched a data-driven startup specializing in web scraping and automation.</li>
+                        <li>Delivered customized data solutions to support strategic decision-making for businesses.</li>
+                    </ul>
+                </div>
+                <div class="mb-6">
+                    <div class="text-yellow-400">WIKISOURCE - Proofreading</div>
+                    <ul class="list-disc list-inside mt-2 ml-4">
+                        <li>Volunteered to digitize old Tamil books into PDF format for Wikisource.</li>
+                    </ul>
+                </div>
+                <div class="mb-6">
+                    <div class="text-yellow-400">Freelance Photo Editor (Adobe Illustrator & Photoshop)</div>
+                    <ul class="list-disc list-inside mt-2 ml-4">
+                        <li>Creating professional ceremony albums as a freelance photo editor.</li>
+                    </ul>
+                </div>
+                <div>
+                    <div class="text-yellow-400">Internship: BLUELOOP</div>
+                    <ul class="list-disc list-inside mt-2 ml-4">
+                        <li>Gained hands-on experience in Python development during an internship.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="command-output hidden" id="educationOutputLibrary">
+                <div class="text-green-400 mb-3 font-semibold">Education:</div>
+                <div class="mb-4">
+                    <div class="text-yellow-400">B.E. Electronics & Communication (2022 - 2026)</div>
+                    <div class="mt-2 ml-4">Vel Tech Multi Tech Dr. Rangarajan Dr. Sakunthala Engineering College</div>
+                    <div class="mt-1 ml-4 text-gray-400">Avadi, Chennai</div>
+                </div>
+                <div>
+                    <div class="text-yellow-400">Higher Secondary (2020 - 2022)</div>
+                    <div class="mt-2 ml-4">Dhanalakshmi Higher Secondary School</div>
+                    <div class="mt-1 ml-4 text-gray-400">Royapuram, Chennai</div>
+                </div>
+            </div>
+
+            <div class="command-output hidden" id="contactOutputLibrary">
+                <div class="text-green-400 mb-3 font-semibold">Contact Information:</div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <div class="flex items-center mb-3">
+                            <i class="fas fa-phone-alt text-yellow-400 mr-3"></i>
+                            <span>+91 8056133423</span>
+                        </div>
+                        <div class="flex items-center mb-3">
+                            <i class="fas fa-envelope text-yellow-400 mr-3"></i>
+                            <span>illiyas10015@gmail.com</span>
+                        </div>
+                        <div class="flex items-center">
+                            <i class="fas fa-map-marker-alt text-yellow-400 mr-3"></i>
+                            <span>Chennai, Tamil Nadu</span>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="flex items-center mb-3">
+                            <i class="fab fa-linkedin text-yellow-400 mr-3"></i>
+                            <a href="https://www.linkedin.com/in/illiyas-n" target="_blank" class="hover:underline" aria-label="LinkedIn Profile">LinkedIn Profile</a>
+                        </div>
+                        <div class="flex items-center mb-3">
+                            <i class="fab fa-github text-yellow-400 mr-3"></i>
+                            <a href="https://github.com/illiyas-n" target="_blank" class="hover:underline" aria-label="GitHub Profile">GitHub Profile</a>
+                        </div>
+                        <div class="flex items-center">
+                            <i class="fas fa-globe text-yellow-400 mr-3"></i>
+                            <a href="https://illiyas-n-portfolio.vercel.app" target="_blank" class="hover:underline" aria-label="Personal Website">Personal Website</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- History container: dynamic outputs & echoed commands go here -->
+            <div id="history" aria-live="polite"></div>
+
+            <!-- welcome area (kept visible as first message) -->
+            <div class="command-output" id="welcomeMessageContainer">
+                <div class="typewriter" id="welcomeMessage"></div>
+            </div>
+
+            <!-- command entry line -->
+            <div class="command-line" id="commandEntryLine">
+                <div class="prompt">visitor@portfolio:~$</div>
+                <div class="flex-1 relative">
+                    <input
+                        type="text"
+                        class="command-input"
+                        id="commandInput"
+                        autocomplete="off"
+                        spellcheck="false"
+                        aria-label="Terminal command input"
+                        autofocus
+                    />
+                    <div class="absolute right-0 top-0 mt-1 mr-2 text-gray-400 text-sm hidden md:block" id="hintText">Press Enter to run • Tab to autocomplete</div>
+                    <div class="autocomplete-suggestions hidden" id="autocompleteSuggestions" role="listbox" aria-label="Command suggestions"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const terminalBody = document.getElementById('terminalBody');
+            const historyEl = document.getElementById('history');
+            const commandInput = document.getElementById('commandInput');
+            const welcomeMessage = document.getElementById('welcomeMessage');
+            const autocompleteSuggestions = document.getElementById('autocompleteSuggestions');
+
+            // Library nodes (templates) for commands
+            const library = {
+                help: document.getElementById('helpOutputLibrary'),
+                about: document.getElementById('aboutOutputLibrary'),
+                skills: document.getElementById('skillsOutputLibrary'),
+                experience: document.getElementById('experienceOutputLibrary'),
+                education: document.getElementById('educationOutputLibrary'),
+                contact: document.getElementById('contactOutputLibrary'),
+            };
+
+            const commands = Object.keys(library).concat(['clear']);
+            let commandHistory = [];
+            let historyIndex = -1;
+
+            // Type welcome message (typewriter effect)
+            const welcomeText = "Welcome to ILLIYAS N's Terminal Portfolio!\n\nType 'help' to see available commands.";
+            let i = 0;
+            function typeWriter() {
+                if (i < welcomeText.length) {
+                    if (welcomeText.charAt(i) === '\n') {
+                        welcomeMessage.innerHTML += '<br>';
+                    } else {
+                        welcomeMessage.innerHTML += welcomeText.charAt(i);
+                    }
+                    i++;
+                    setTimeout(typeWriter, Math.random() * 30 + 15);
+                } else {
+                    // Remove the border-right after typing to avoid persistent caret look
+                    welcomeMessage.style.borderRight = '0';
+                    commandInput.focus();
+                }
+            }
+            typeWriter();
+
+            // Ensure focus on click anywhere in terminal-body
+            terminalBody.addEventListener('click', function (e) {
+                if (!e.target.closest('.autocomplete-suggestion')) {
+                    commandInput.focus();
+                }
+            });
+
+            // Helpers
+            function scrollToBottom() {
+                setTimeout(() => {
+                    terminalBody.scrollTop = terminalBody.scrollHeight;
+                }, 40);
+            }
+
+            function showSuggestions(partial, inputRect) {
+                const partialLower = partial.toLowerCase();
+                const matches = commands.filter(cmd => cmd.startsWith(partialLower));
+                if (matches.length === 0) {
+                    autocompleteSuggestions.classList.add('hidden');
+                    return;
+                }
+                autocompleteSuggestions.innerHTML = '';
+                matches.forEach((m, idx) => {
+                    const d = document.createElement('div');
+                    d.className = 'autocomplete-suggestion';
+                    d.setAttribute('role', 'option');
+                    d.dataset.index = idx;
+                    d.textContent = m;
+                    autocompleteSuggestions.appendChild(d);
+                });
+
+                // position suggestions under the input
+                const entryLine = document.getElementById('commandEntryLine');
+                const rect = entryLine.getBoundingClientRect();
+                // place suggestions relative to entry line left edge
+                autocompleteSuggestions.style.left = '170px'; // matches .prompt min-width
+                autocompleteSuggestions.style.top = (entryLine.offsetTop + entryLine.offsetHeight) + 'px';
+                autocompleteSuggestions.classList.remove('hidden');
+            }
+
+            // Keyboard: input
+            commandInput.addEventListener('keydown', function (e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    const raw = commandInput.value;
+                    const command = raw.trim().toLowerCase();
+                    if (command) {
+                        commandHistory.push(command);
+                        historyIndex = commandHistory.length;
+                    }
+                    commandInput.value = '';
+                    autocompleteSuggestions.classList.add('hidden');
+                    runCommand(command);
+                } else if (e.key === 'ArrowUp') {
+                    if (commandHistory.length === 0) return;
+                    if (historyIndex > 0) {
+                        historyIndex--;
+                        commandInput.value = commandHistory[historyIndex];
+                    } else {
+                        historyIndex = 0;
+                        commandInput.value = commandHistory[0];
+                    }
+                    e.preventDefault();
+                } else if (e.key === 'ArrowDown') {
+                    if (commandHistory.length === 0) return;
+                    if (historyIndex < commandHistory.length - 1) {
+                        historyIndex++;
+                        commandInput.value = commandHistory[historyIndex];
+                    } else {
+                        historyIndex = commandHistory.length;
+                        commandInput.value = '';
+                    }
+                    e.preventDefault();
+                } else if (e.key === 'Tab') {
+                    e.preventDefault();
+                    const partial = commandInput.value.trim().toLowerCase();
+                    const matches = commands.filter(cmd => cmd.startsWith(partial));
+                    if (matches.length === 1) {
+                        commandInput.value = matches[0];
+                        autocompleteSuggestions.classList.add('hidden');
+                    } else if (matches.length > 1) {
+                        // Show suggestions (keeps possible choices visible)
+                        showSuggestions(partial);
+                    }
+                } else if (e.key === 'Escape') {
+                    autocompleteSuggestions.classList.add('hidden');
+                }
+            });
+
+            // input event: autocomplete
+            commandInput.addEventListener('input', function () {
+                const partial = commandInput.value.trim().toLowerCase();
+                if (partial.length > 0) {
+                    showSuggestions(partial);
+                } else {
+                    autocompleteSuggestions.classList.add('hidden');
+                }
+            });
+
+            // suggestion clicks + keyboard nav
+            autocompleteSuggestions.addEventListener('click', function (e) {
+                const target = e.target.closest('.autocomplete-suggestion');
+                if (!target) return;
+                commandInput.value = target.textContent;
+                autocompleteSuggestions.classList.add('hidden');
+                commandInput.focus();
+            });
+
+            // support arrow navigation inside suggestions via mouseover/focus
+            autocompleteSuggestions.addEventListener('mousemove', function (e) {
+                const target = e.target.closest('.autocomplete-suggestion');
+                if (!target) return;
+                Array.from(autocompleteSuggestions.children).forEach(c => c.classList.remove('focused'));
+                target.classList.add('focused');
+            });
+
+            // capture keydown on document to navigate suggestion list when visible
+            document.addEventListener('keydown', function (e) {
+                if (autocompleteSuggestions.classList.contains('hidden')) return;
+                const items = Array.from(autocompleteSuggestions.children);
+                if (items.length === 0) return;
+                const focusedIndex = items.findIndex(i => i.classList.contains('focused'));
+                if (e.key === 'ArrowDown') {
+                    e.preventDefault();
+                    let next = focusedIndex + 1;
+                    if (next >= items.length) next = 0;
+                    items.forEach(i => i.classList.remove('focused'));
+                    items[next].classList.add('focused');
+                } else if (e.key === 'ArrowUp') {
+                    e.preventDefault();
+                    let prev = focusedIndex - 1;
+                    if (prev < 0) prev = items.length - 1;
+                    items.forEach(i => i.classList.remove('focused'));
+                    items[prev].classList.add('focused');
+                } else if (e.key === 'Enter' && focusedIndex >= 0) {
+                    e.preventDefault();
+                    commandInput.value = items[focusedIndex].textContent;
+                    autocompleteSuggestions.classList.add('hidden');
+                    commandInput.focus();
+                }
+            });
+
+            // Main runner: append echoed command + corresponding output (cloned from library)
+            function runCommand(command) {
+                // Add echoed command to history
+                const echo = document.createElement('div');
+                echo.className = 'command-line';
+                echo.innerHTML = `<div class="prompt">visitor@portfolio:~$</div><div style="white-space:pre-wrap">${escapeHtml(command || '')}</div>`;
+                historyEl.appendChild(echo);
+
+                // If empty command, nothing else
+                if (!command) {
+                    scrollToBottom();
+                    return;
+                }
+
+                if (command === 'clear') {
+                    // clear only dynamic history (echoed commands & dynamic outputs)
+                    historyEl.innerHTML = '';
+                    scrollToBottom();
+                    return;
+                }
+
+                if (library[command]) {
+                    // clone the static library node and append a visible copy into history
+                    const node = library[command];
+                    const clone = node.cloneNode(true);
+                    clone.id = ''; // remove duplicate id
+                    clone.classList.remove('hidden');
+                    historyEl.appendChild(clone);
+                } else {
+                    // unknown command
+                    const unknown = document.createElement('div');
+                    unknown.className = 'command-output';
+                    unknown.innerHTML = `<span class="text-red-400">Error: '${escapeHtml(command)}' is not a valid command.</span> Type 'help' for a list of commands.`;
+                    historyEl.appendChild(unknown);
+                }
+
+                scrollToBottom();
+            }
+
+            // Utility: escape HTML so echoed text is safe
+            function escapeHtml(unsafe) {
+                return unsafe
+                    .replace(/&/g, "&amp;")
+                    .replace(/</g, "&lt;")
+                    .replace(/>/g, "&gt;")
+                    .replace(/"/g, "&quot;")
+                    .replace(/'/g, "&#039;");
+            }
+
+            // Accessibility: focus input when page loaded
+            setTimeout(() => {
+                commandInput.focus();
+            }, 500);
+        });
+    </script>
+</body>
+</html>
